@@ -1,0 +1,7 @@
+.idea
+dist
+wwshc.egg-info
+wwshc/wwshc.egg-info
+chromedriver.exe
+main.py
+pass.txt
