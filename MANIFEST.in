@@ -1,0 +1,6 @@
+include pyproject.toml
+include *.md
+include wwshc/*.py
+include LICENSE.txt
+include requirements.txt
+include setup.py
