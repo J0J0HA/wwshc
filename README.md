@@ -1,7 +1,7 @@
 # WWSHC
 This is an unofficial module to control WWS (https://wwschool.de; Also other Services using WebWeaver Software) via python code.
 
-### Changes in 0.0.9:
+### Changes in 0.0.11:
 * Added eventsystem (wws.events)
 * Updated selenium to 4.1.0
 * Started updating syntax of selenium find_element functions
