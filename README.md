@@ -30,7 +30,7 @@ If you want to make automated answers, you can use this code:
 ```
 import wwshc
 
-wws = wwshc.Agent("https://wwschool.de", "username", "password") # Creating the Agent
+wws = wwshc.Agent("https://wwschool.de", "username", "password")     # Creating the Agent
 
 def answer(text, name, mail, send_time):
     if mail != wws.USER:                    # Ignore messages from yourself to prevent endless loops
