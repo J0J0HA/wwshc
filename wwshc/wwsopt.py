@@ -3,12 +3,32 @@ import selenium.common.exceptions
 import wwshc.wwserr
 import wwshc.wwsels
 import warnings
+from typing import *
 from selenium.webdriver.common.by import By
 
 
 def void(*args, **kwargs):
     pass
 
+
+def _acting(*vargs: Tuple[Any], **vkwargs: Dict[Any, Any]) -> Callable:
+    void(*vargs, **vkwargs)
+
+    def worker(func: Callable) -> Callable:
+        def wrapper(*args: Tuple, **kwargs: Dict) -> Any:
+            if "_ignore" in kwargs and kwargs["_ignore"]:
+                kwargs.pop("_ignore")
+                return func(*args, **kwargs)
+            else:
+                time.sleep(args[0].maw)
+                while args[0].parent.acting:
+                    time.sleep(args[0].maw)
+                args[0].parent.acting = True
+                r = func(*args, **kwargs)
+                args[0].parent.acting = False
+            return r
+        return wrapper
+    return worker
 
 def filter_userlist(self, only_online: bool, stop_name: str, stop_mail: str):
     res = []

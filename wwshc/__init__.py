@@ -1,9 +1,6 @@
-import enum
 import json
-import multiprocessing
 import threading
 from typing import *
-
 import selenium.common.exceptions
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -12,7 +9,7 @@ import time
 import wwshc.wwsels
 import wwshc.wwsopt
 import wwshc.wwsevent
-#import pydatfile
+from wwshc.wwsopt import _acting
 import pyderman
 import wwshc.wwserr
 from selenium.webdriver.common.by import By
@@ -69,19 +66,6 @@ class Agent:
             win10toast.ToastNotifier().show_toast("WWSHC", "WebWeaverSchoolHackClient-Agent erfolgreich gestartet.", threaded=True)
         self.acting = False
 
-    def _acting(self: ClassVar):
-        def worker(func: Callable):
-            def wrapper(*args: Tuple, **kwargs: Dict):
-                time.sleep(self.maw)
-                while self.parent.acting:
-                    time.sleep(self.maw)
-                self.parent.acting = True
-                r = func(*args, **kwargs)
-                self.parent.acting = False
-                return r
-            return wrapper
-        return worker
-
     def hold(self: ClassVar, autostop: bool = True):
         """
         Hold the window opened (useless if headless)
@@ -101,15 +85,12 @@ class Agent:
                 except selenium.common.exceptions.WebDriverException:
                     break
 
+    @_acting()
     def quit(self: ClassVar) -> bool:
         """
         Close the Window
         :return: Success
         """
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         try:
             self.driver.quit()
             return True
@@ -146,7 +127,7 @@ class Agent:
         except selenium.common.exceptions.NoSuchElementException:
             pass
 
-#    @_acting()
+    @_acting()
     def class_list(self: ClassVar) -> List[wwshc.wwsels.Class]:
         """
         Use this to list all Classes are available for you
@@ -157,9 +138,9 @@ class Agent:
         for c in Select(self.driver.find_element(by=By.CSS_SELECTOR, value='[html_title="Meine Klassen"]')).options:
             if c.text != "Meine Klassen" and c.text != "--------------------------------------":
                 clss.append(wwshc.wwsels.Class(c.text, self))
-        self.parent.acting = False
         return clss
 
+    @_acting()
     def class_get(self, name: str) -> wwshc.wwsels.Class:
         """
         Use this to get a Class available for you
@@ -167,35 +148,27 @@ class Agent:
         :param name: Name of the Class you want to have
         :return: The Class you requested
         """
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.check()
         for c in self.class_list():
             if c.name == name:
                 self.parent.acting = False
                 return c
-        self.parent.acting = False
         raise wwshc.wwserr.NoSuchClass(f"No class with name '{name}' found.")
 
+    @_acting()
     def groups_list(self: ClassVar) -> List[wwshc.wwsels.Group]:
         """
         Use this to list all Groups are available for you
         :return: List of all Groups
         """
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.check()
         grps = []
         for g in Select(self.driver.find_element(by=By.CSS_SELECTOR, value='[html_title="Meine Gruppen"')).options:
             if g.text != "Meine Gruppen" and g.text != "Gruppenübersicht" and g.text != "--------------------------------------":
                 grps.append(wwshc.wwsels.Group(g.text, self))
-        self.parent.acting = False
         return grps
 
+    @_acting()
     def groups_get(self, name: str):
         """
         Use this to get a Group avalible for you
@@ -204,31 +177,20 @@ class Agent:
         :param name: Name of the Group you want to have
         :return: The Group you requested
         """
-
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.check()
         for g in self.groups_list():
             if g.name == name:
                 self.parent.acting = False
                 return g
-        self.parent.acting = False
         raise wwshc.wwserr.NoSuchGroup(f"No group with name '{name}' found.")
 
-    def users_list(self, only_online=False, stop_name="", stop_mail="", _ignore=False):
+    def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users in Contacts
 
         :param only_online: If you want to list ony people are online.
         :return: List of all Users in Contacts
         """
-        if not _ignore:
-            time.sleep(self.maw)
-            while self.parent.acting:
-                time.sleep(self.maw)
-        self.acting = True
         self._navto()
         self.driver.find_element(by=By.ID, value="menu_105492").find_element(by=By.TAG_NAME, value="a").click()
         res = []
@@ -240,18 +202,11 @@ class Agent:
                 res.append(wwshc.wwsels.User(u.find_elements(by=By.TAG_NAME, value="td")[3].text,
                                              u.find_elements(by=By.TAG_NAME, value="td")[4].text, self, self))
             if u.text == stop_name:
-                if not _ignore:
-                    self.acting = False
                 return res
-        if not _ignore:
-            self.acting = False
         return res
 
+    @_acting()
     def users_add(self, name_or_mail):
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         try:
             self._navto()
             self.driver.find_element(by=By.ID, value="menu_105492").find_element(by=By.TAG_NAME, value="a").click()
@@ -263,25 +218,17 @@ class Agent:
                 self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
                 self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
             except selenium.common.exceptions.NoSuchElementException:
-                self.parent.acting = False
                 raise wwshc.wwserr.AlreadyInContacts("This User is already in your contact list")
             time.sleep(self.maw)
             wwshc.wwsopt.use_main(self)
-            self.parent.acting = False
         except selenium.common.exceptions.UnexpectedAlertPresentException as e:
             if e.alert_text == "Kein gültiger Nutzer":
-                self.parent.acting = False
                 raise wwshc.wwserr.NoSuchUser(f"The User {name_or_mail} is not existing.")
             else:
-                self.parent.acting = False
                 print(e.alert_text)
 
+    @_acting()
     def users_remove(self, name_or_mail):
-
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self._navto()
         self.driver.find_element(by=By.ID, value="menu_105492").find_element(by=By.TAG_NAME, value="a").click()
         print(self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody")
@@ -298,7 +245,6 @@ class Agent:
         self.driver.switch_to.alert()
         self.driver.close()
         self.driver.switch_to.active_element()
-        self.parent.acting = False
 
     def users_getByName(self, name: str):
         """
@@ -308,9 +254,8 @@ class Agent:
         :param name: Name of the User you are requesting.
         :return: The User you Requested
         """
-        for u in self.users_list():#stop_name=name):
+        for u in self.users_list(stop_name=name):
             if u.name == name:
-                self.parent.acting = False
                 return u
         raise wwshc.wwserr.NoSuchUser(f"No user with name '{name}' found.")
 
@@ -324,15 +269,11 @@ class Agent:
         """
         for u in self.users_list(stop_mail=mail):
             if u.mail == mail:
-                self.parent.acting = False
                 return u
         raise wwshc.wwserr.NoSuchUser(f"No user with mail '{mail}' found.")
 
+    @_acting()
     def files_uploadFile(self, filepath):
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.driver.find_element(by=By.ID, value="menu_121332").find_element(by=By.TAG_NAME, value="a").click()
         self.driver.find_element(by=By.LINK_TEXT, value="Neue Datei ablegen").click()
         time.sleep(self.maw)
@@ -340,7 +281,6 @@ class Agent:
         self.driver.find_element(by=By.NAME, value="file[]").send_keys(filepath)
         self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
         wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
     def files_addFile(self, filepath):
         raise NotImplementedError("Cannot add a file.")
@@ -348,11 +288,8 @@ class Agent:
     def files_removeFile(self, path):
         raise NotImplementedError("Cannot remove a file.")
 
+    @_acting()
     def files_addFolder(self, name, description=""):
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.driver.find_element(by=By.ID, value="menu_121332").find_element(by=By.TAG_NAME, value="a").click()
         self.driver.find_element(by=By.LINK_TEXT, value="Ordner anlegen").click()
         time.sleep(self.maw)
@@ -361,7 +298,6 @@ class Agent:
         self.driver.find_element(by=By.NAME, value="description").send_keys(description)
         self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
         wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
     def files_removeFolder(self, path):
         """
@@ -369,8 +305,8 @@ class Agent:
         """
         raise NotImplementedError("Cannot remove a folder.")
 
+    @_acting()
     def tasks_list(self):
-        self.acting = True
         self._navto()
         res = []
         self.driver.find_element(by=By.ID, value="menu_105500").find_element(by=By.TAG_NAME, value="a").click()
@@ -378,7 +314,6 @@ class Agent:
                 .find_element(by=By.TAG_NAME, value="tbody").find_elements(by=By.TAG_NAME, value="tr"):
             res.append(wwshc.wwsels.Task(element.find_element(by=By.CLASS_NAME, value="c_title").text,
                        element.find_element(by=By.CLASS_NAME, value="c_source").text, element.get_property("sort") == "2", self, self))
-        self.acting = False
         return res
 
     def tasks_get(self, filter: wwshc.wwsopt.Filter):

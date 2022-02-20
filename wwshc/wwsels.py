@@ -1,7 +1,6 @@
 import time
-
 import selenium.common.exceptions
-
+from wwshc.wwsopt import _acting
 import wwshc.wwserr
 import wwshc.wwsopt
 from selenium.webdriver.support.ui import Select
@@ -29,16 +28,13 @@ class User:
         self.brother._navto()
         wwshc.wwsopt.void(self.brother.users_list(_ignore=True))
 
+    @_acting()
     def quick_send(self, text):
         """
         Send a Quickmessage to the User
 
         :param text: Text of the Message to send
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navto()
         time.sleep(self.maw)
         self.driver.find_element_by_xpath(f'//*[contains(concat(" ", normalize-space(@class), " "), " table_list '
@@ -54,7 +50,6 @@ class User:
         time.sleep(self.parent.maw)
         self.driver.find_element_by_class_name("submit").click()
         wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
 
 class Group:

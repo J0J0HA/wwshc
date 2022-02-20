@@ -1,9 +1,9 @@
 import wwshc
 
-with open("user.txt") as usernm:
-    with open("pass.txt") as passwd:
-        wws = wwshc.Agent("https://wwschool.de", usernm.read(), passwd.read(), False)
+with open(r"user.txt", "r") as usernm:
+    with open(r"pass.txt", "r") as passwd:
+        wws = wwshc.Agent("https://wwschool.de", usernm.read(), passwd.read(), no_notification=True)
 
-def test(): pass
-print(test.__class__)
+
+wws.eventloop()
 print(wws.class_list())
