@@ -1,6 +1,8 @@
 import enum
+import json
 import multiprocessing
 import threading
+from typing import *
 
 import selenium.common.exceptions
 from selenium import webdriver
@@ -10,7 +12,7 @@ import time
 import wwshc.wwsels
 import wwshc.wwsopt
 import wwshc.wwsevent
-import pydatfile
+#import pydatfile
 import pyderman
 import wwshc.wwserr
 from selenium.webdriver.common.by import By
@@ -21,10 +23,9 @@ def ensure_chromedriver():
 
 
 class Agent:
-    def __init__(self, url="", user="", passwd="", hide=True, wait=0.5, no_notification=False, file=None):
+    def __init__(self: ClassVar, url: str = "", user: str = "", passwd: str = "", hide: bool = True, wait: [float, int] = 0.5, no_notification: bool = False, file = None):
         """
         THIS PROJECT WAS CREATED BY A STUDENT. THERE ARE MANY FUNCTIONS THAT ONLY ADMINS HAVE OR THAT HAVE NOT BEEN RELEASED TO ME. THESE ARE NOT INCLUDED.
-
         :param url: URL of your wws-System.
         :param user: E-Mail of your WebWeaverSchool-Account (Normally name@schoolname.wwsurl.topleveldomain)
         :param passwd: Password of your WebWeaverSchool-Account
@@ -35,7 +36,7 @@ class Agent:
         """
         ensure_chromedriver()   # Ensure the newest chromedriver is installed.
         if file is not None:
-            f = pydatfile.open(file, except_value={})
+            f = json.load(file)
             self.URL = f["url"]
             self.USER = f["user"]
             self.PASS = f["passwd"]
@@ -68,10 +69,22 @@ class Agent:
             win10toast.ToastNotifier().show_toast("WWSHC", "WebWeaverSchoolHackClient-Agent erfolgreich gestartet.", threaded=True)
         self.acting = False
 
-    def hold(self, autostop=True):
+    def _acting(self: ClassVar):
+        def worker(func: Callable):
+            def wrapper(*args: Tuple, **kwargs: Dict):
+                time.sleep(self.maw)
+                while self.parent.acting:
+                    time.sleep(self.maw)
+                self.parent.acting = True
+                r = func(*args, **kwargs)
+                self.parent.acting = False
+                return r
+            return wrapper
+        return worker
+
+    def hold(self: ClassVar, autostop: bool = True):
         """
         Hold the window opened (useless if headless)
-
         :param autostop: Atomatticcally stop holding if the window is closed.
         """
         self.holdOn = True
@@ -88,8 +101,11 @@ class Agent:
                 except selenium.common.exceptions.WebDriverException:
                     break
 
-    def quit(self):
-
+    def quit(self: ClassVar) -> bool:
+        """
+        Close the Window
+        :return: Success
+        """
         time.sleep(self.maw)
         while self.parent.acting:
             time.sleep(self.maw)
@@ -102,7 +118,7 @@ class Agent:
         except selenium.common.exceptions.WebDriverException:
             return False
 
-    def _navto(self):
+    def _navto(self: ClassVar):
         """
         Navigate to the web-page of this element
         """
@@ -117,7 +133,7 @@ class Agent:
         self.driver.get(self.URL+suburl)
         self.check()
 
-    def check(self):
+    def check(self: ClassVar):
         """
         Checks if a login is needed and logs in.
         """
@@ -130,17 +146,12 @@ class Agent:
         except selenium.common.exceptions.NoSuchElementException:
             pass
 
-    def class_list(self):
+#    @_acting()
+    def class_list(self: ClassVar) -> List[wwshc.wwsels.Class]:
         """
-        Use this to list all Classes are avalible for you
-
-        :return: List of all Classes
+        Use this to list all Classes are available for you
+        :return: List
         """
-
-        time.sleep(self.maw)
-        while self.parent.acting:
-            time.sleep(self.maw)
-        self.parent.acting = True
         self.check()
         clss = []
         for c in Select(self.driver.find_element(by=By.CSS_SELECTOR, value='[html_title="Meine Klassen"]')).options:
@@ -149,15 +160,13 @@ class Agent:
         self.parent.acting = False
         return clss
 
-    def class_get(self, name: str):
+    def class_get(self, name: str) -> wwshc.wwsels.Class:
         """
-        Use this to get a Class avalible for you
-        :raise wwshc.err.NoSuchClass: If the Class is not avalible for you or is not existing
-
+        Use this to get a Class available for you
+        :raise wwshc.err.NoSuchClass: If the Class is not available for you or is not existing
         :param name: Name of the Class you want to have
         :return: The Class you requested
         """
-
         time.sleep(self.maw)
         while self.parent.acting:
             time.sleep(self.maw)
@@ -170,13 +179,11 @@ class Agent:
         self.parent.acting = False
         raise wwshc.wwserr.NoSuchClass(f"No class with name '{name}' found.")
 
-    def groups_list(self):
+    def groups_list(self: ClassVar) -> List[wwshc.wwsels.Group]:
         """
-        Use this to list all Groups are avalible for you
-
+        Use this to list all Groups are available for you
         :return: List of all Groups
         """
-
         time.sleep(self.maw)
         while self.parent.acting:
             time.sleep(self.maw)
