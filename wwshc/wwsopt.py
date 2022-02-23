@@ -112,3 +112,71 @@ class Filter:
                 if self.__getattribute__(a) == e.__getattribute__(a):
                     filtered_list.remove(e)
         return filtered_list
+
+
+class Cache:
+    funcs: Dict[AnyStr, Any] = {}
+
+    def cached(self, ignore_args: bool = False) -> Callable:
+        def decorator(func: Callable) -> Callable:
+            if ignore_args:
+                def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    if "__EXTRA__" in kwargs:
+                        if kwargs["__EXTRA__"] == "__SKIP__":
+                            kwargs.pop("__EXTRA__")
+                            return func(*args, **kwargs)
+                        if kwargs["__EXTRA__"] == "__RESET__":
+                            kwargs.pop("__EXTRA__")
+                            self.clear(repr(func.__module__ + "." + func.__name__))
+                    if not repr(func.__module__ + "." + func.__name__) in self.funcs:
+                        self.funcs[repr(func.__module__ + "." + func.__name__)] = func(*args, **kwargs)
+                    return self.funcs[repr(func.__module__ + "." + func.__name__)]
+            else:
+                def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    if "__EXTRA__" in kwargs:
+                        if kwargs["__EXTRA__"] == "__SKIP__":
+                            kwargs.pop("__EXTRA__")
+                            return func(*args, **kwargs)
+                        if kwargs["__EXTRA__"] == "__RESET__":
+                            kwargs.pop("__EXTRA__")
+                            self.clear(repr([func.__module__ + "." + func.__name__, args, kwargs, ]))
+                    if not repr([func.__module__ + "." + func.__name__, args, kwargs, ]) in self.funcs:
+                        self.funcs[repr([func.__module__ + "." + func.__name__, args, kwargs, ])] = func(*args, **kwargs)
+                    return self.funcs[repr([func.__module__ + "." + func.__name__, args, kwargs, ])]
+            return wrapper
+        return decorator
+
+    def cached_as(self, key: AnyStr, ignore_args: bool = False):
+        def decorator(func: Callable) -> Callable:
+            if ignore_args:
+                def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    if "__EXTRA__" in kwargs:
+                        if kwargs["__EXTRA__"] == "__SKIP__":
+                            kwargs.pop("__EXTRA__")
+                            return func(*args, **kwargs)
+                        if kwargs["__EXTRA__"] == "__RESET__":
+                            kwargs.pop("__EXTRA__")
+                            self.clear(repr(key))
+                    if not repr(key) in self.funcs:
+                        self.funcs[repr(key)] = func(*args, **kwargs)
+                    return self.funcs[repr(key)]
+            else:
+                def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    if "__EXTRA__" in kwargs:
+                        if kwargs["__EXTRA__"] == "__SKIP__":
+                            kwargs.pop("__EXTRA__")
+                            return func(*args, **kwargs)
+                        if kwargs["__EXTRA__"] == "__RESET__":
+                            kwargs.pop("__EXTRA__")
+                            self.clear(repr([key, args, kwargs, ]))
+                    if not repr([key, args, kwargs, ]) in self.funcs:
+                        self.funcs[repr([key, args, kwargs, ])] = func(*args, **kwargs)
+                    return self.funcs[repr([key, args, kwargs, ])]
+            return wrapper
+        return decorator
+
+    def clear(self, key: [AnyStr, None] = None) -> None:
+        if key is not None:
+            self.funcs.pop(key)
+        else:
+            self.funcs = {}
