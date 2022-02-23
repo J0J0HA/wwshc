@@ -1,4 +1,5 @@
 import wwshc
+from typing import *
 
 with open(r"user.txt", "r") as usernm:
     with open(r"pass.txt", "r") as passwd:

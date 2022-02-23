@@ -70,6 +70,7 @@ class Group:
         self.parent._navto()
         Select(self.driver.find_element_by_id("top_select_18")).select_by_visible_text(self.name)
 
+    @_acting()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users of this Group
@@ -77,16 +78,12 @@ class Group:
         :param only_online: If you want to list ony people are online.
         :return: List of all Users of this Group
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navto()
         self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist(self, only_online, stop_name, stop_mail)
-        self.parent.acting = False
         return res
 
+    @_acting()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Group by his Name
@@ -95,16 +92,12 @@ class Group:
         :param name: Name of the User you are requesting.
         :return: The User you Requested
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navto()
         self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist_name(self, name, only_online)
-        self.parent.acting = False
         return res
 
+    @_acting()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Group by his E-Mail
@@ -113,14 +106,9 @@ class Group:
         :param mail: E-Mail of the User you are requesting.
         :return: The User you Requested
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navto()
         self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist_mail(self, mail, only_online)
-        self.parent.acting = False
         return res
 
 
@@ -142,6 +130,7 @@ class Class:
         self.parent._navto()
         Select(self.driver.find_element_by_id("top_select_19")).select_by_visible_text(self.name)
 
+    @_acting()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users of this Group
@@ -149,16 +138,12 @@ class Class:
         :param only_online: If you want to list ony people are online.
         :return: List of all Users of this Group
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist(self, only_online, stop_name, stop_mail)
-        self.parent.acting = False
         return res
 
+    @_acting()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Class by his Name
@@ -167,16 +152,12 @@ class Class:
         :param name: Name of the User you are requesting.
         :return: The User you Requested
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist_name(self, name, only_online)
-        self.parent.acting = False
         return res
 
+    @_acting()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Class by his E-Mail
@@ -186,16 +167,12 @@ class Class:
         :param only_online: Only search for online users
         :return: The User you Requested
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist_mail(self, mail, only_online)
-        self.parent.acting = False
         return res
 
+    @_acting()
     def forum_commentPost(self, id: str, text: str, icon: str, popup: bool, quote: bool):
         """
         Send a commant to a post in the forum of this class
@@ -206,10 +183,6 @@ class Class:
         :param popup: Pass True if you want to get System-Messages if someone answers your comment; else False
         :param quote: Pass True if you want to insert a quote of the post you're answering to
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_109660").find_element_by_tag_name("a").click()
         for p in self.driver.find_element_by_class_name("jail_table").find_element_by_tag_name(
@@ -250,13 +223,9 @@ class Class:
                 self.driver.find_element_by_name("preview").click()
                 self.driver.find_element_by_name("save").click()
                 wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
+    @_acting()
     def forum_createPost(self, title: str, text: str, icon: str, popup: bool):
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_109660").find_element_by_tag_name("a").click()
         self.driver.find_element_by_link_text("Neuen Diskussionsstrang eröffnen").click()
@@ -286,18 +255,14 @@ class Class:
         self.driver.find_element_by_name("preview").click()
         self.driver.find_element_by_name("save").click()
         wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
+    @_acting()
     def forum_listPosts(self):
         """
         Get a list of all posts in the forum of this class
 
         :return: List of dicts with infos about a forum post
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         res = []
         self._navTo()
         self.driver.find_element_by_id("menu_109660").find_element_by_tag_name("a").click()
@@ -307,20 +272,16 @@ class Class:
             res.append({"id": p.get_property("id"), "title": p.find_element_by_tag_name("a").text,
                         "time": p.find_elements_by_tag_name("td")[2].get_property("sort"),
                         "comments": p.find_element_by_class_name("info").text, "author": self.users_getByName(
-                    "martha.max")})  # p.find_elements_by_tag_name("td")[2].find_element_by_tag_name("span").get_property("html_title")
-        self.parent.acting = False
+                    "martha.max")})
         return res
 
+    @_acting()
     def chat_send(self, msg: str):
         """
         Use This to send a Chat-MSG
 
         :param msg: Text of the MSG
         """
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
         self._navTo()
         self.driver.find_element_by_id("menu_133729").find_element_by_tag_name("a").click()
         self.driver.find_element_by_id("block_link_open_chat").click()
@@ -333,7 +294,6 @@ class Class:
         self.driver.find_element_by_class_name("submit").click()
         self.driver.find_element_by_id("popup_top_icons_icon_close").find_element_by_tag_name("a").click()
         wwshc.wwsopt.use_main(self)
-        self.parent.acting = False
 
 
 class Task:
