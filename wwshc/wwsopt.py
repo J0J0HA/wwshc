@@ -30,6 +30,7 @@ def _acting(*vargs: Tuple[Any], **vkwargs: Dict[Any, Any]) -> Callable:
         return wrapper
     return worker
 
+
 def filter_userlist(self, only_online: bool, stop_name: str, stop_mail: str):
     res = []
     if not only_online:
@@ -120,13 +121,15 @@ class Cache:
     """
 
     cache: Dict[AnyStr, Any] = {}
-    extra: str = "__EXTRA__"
+    EXTRA: Final[str] = "__EXTRA__"
     SKIP: Final[str] = "__SKIP__"
+    C_SKIP: Final[dict] = {EXTRA: SKIP}
     RESET: Final[str] = "__RESET__"
+    C_RESET: Final[str] = {EXTRA: RESET}
 
-    def cached(self, ignore_args: bool = False) -> Callable:
+    def cached(self, ignore_args: bool = False, remove_first: bool = False) -> Callable:
         def decorator(func: Callable) -> Callable:
-            if ignore_args:
+            if ignore_args is True:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
                     if "__EXTRA__" in kwargs:
                         if kwargs["__EXTRA__"] == "__SKIP__":
@@ -140,25 +143,40 @@ class Cache:
                     return self.cache[repr(func.__module__ + "." + func.__name__)]
             else:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    altargs = args
+                    if remove_first:
+                        try:
+                            tuplist = list(altargs)
+                            tuplist.pop(0)
+                            altargs = tuple(tuplist)
+                        except IndexError:
+                            pass
                     if "__EXTRA__" in kwargs:
                         if kwargs["__EXTRA__"] == "__SKIP__":
                             kwargs.pop("__EXTRA__")
                             return func(*args, **kwargs)
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
-                            self.clear(repr([func.__module__ + "." + func.__name__, args, kwargs, ]))
-                    if not repr([func.__module__ + "." + func.__name__, args, kwargs, ]) in self.cache:
-                        self.cache[repr([func.__module__ + "." + func.__name__, args, kwargs, ])] = func(*args, **kwargs)
-                    return self.cache[repr([func.__module__ + "." + func.__name__, args, kwargs, ])]
+                            self.clear(repr([func.__module__ + "." + func.__name__, altargs, kwargs, ]))
+                    if not repr([func.__module__ + "." + func.__name__, altargs, kwargs, ]) in self.cache:
+                        self.cache[repr([func.__module__ + "." + func.__name__, altargs, kwargs, ])] = func(*args, **kwargs)
+                    return self.cache[repr([func.__module__ + "." + func.__name__, altargs, kwargs, ])]
             return wrapper
         return decorator
 
-    def cached_as(self, key: AnyStr, ignore_args: bool = False):
+    def cached_as(self, key: AnyStr, ignore_args: bool = False, remove_first: bool = False):
         if not isinstance(key, str): key = repr(str)
 
         def decorator(func: Callable) -> Callable:
             if ignore_args:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    if remove_first:
+                        try:
+                            tuplist = list(args)
+                            tuplist.pop(0)
+                            args = tuple(tuplist)
+                        except IndexError:
+                            pass
                     if "__EXTRA__" in kwargs:
                         if kwargs["__EXTRA__"] == "__SKIP__":
                             kwargs.pop("__EXTRA__")
@@ -171,16 +189,24 @@ class Cache:
                     return self.cache[key]
             else:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
+                    altargs = args
+                    if remove_first:
+                        try:
+                            tuplist = list(altargs)
+                            tuplist.pop(0)
+                            altargs = tuple(tuplist)
+                        except IndexError:
+                            pass
                     if "__EXTRA__" in kwargs:
                         if kwargs["__EXTRA__"] == "__SKIP__":
                             kwargs.pop("__EXTRA__")
                             return func(*args, **kwargs)
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
-                            self.clear(repr([key, args, kwargs, ]))
-                    if not repr([key, args, kwargs, ]) in self.cache:
-                        self.cache[repr([key, args, kwargs, ])] = func(*args, **kwargs)
-                    return self.cache[repr([key, args, kwargs, ])]
+                            self.clear(repr([key, altargs, kwargs, ]))
+                    if not repr([key, altargs, kwargs, ]) in self.cache:
+                        self.cache[repr([key, altargs, kwargs, ])] = func(*args, **kwargs)
+                    return self.cache[repr([key, altargs, kwargs, ])]
             return wrapper
         return decorator
 
@@ -189,5 +215,6 @@ class Cache:
             self.cache.pop(key)
         else:
             self.cache = {}
+
 
 cache = Cache()

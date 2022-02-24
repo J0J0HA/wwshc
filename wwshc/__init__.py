@@ -143,6 +143,7 @@ class Agent:
         return clss
 
     @_acting()
+    @cache.cached()
     def class_get(self, name: str) -> wwshc.wwsels.Class:
         """
         Use this to get a Class available for you
@@ -379,6 +380,12 @@ class Agent:
     def _handler_new_window(self, window, title, url):
         if "Quickmessage lesen" in title:
             self.quicks.append({"window": window, "title": title, "url": url})
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"Agent(url={repr(self.URL)}, user={repr(self.USER)})"
 
     def __exit__(self):
         return self.__del__()

@@ -54,6 +54,12 @@ class User:
         self.driver.find_element_by_class_name("submit").click()
         wwshc.wwsopt.use_main(self)
 
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"User(name={repr(self.name)}, mail={repr(self.mail)}, agent={repr(self.parent)})"
+
 
 class Group:
     def __init__(self, name: str, wws):
@@ -113,6 +119,12 @@ class Group:
         self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist_mail(self, mail, only_online)
         return res
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"Group(name={repr(self.name)}, parent={repr(self.parent)})"
 
 
 class Class:
@@ -303,6 +315,12 @@ class Class:
         self.driver.find_element_by_id("popup_top_icons_icon_close").find_element_by_tag_name("a").click()
         wwshc.wwsopt.use_main(self)
 
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"Class(name={repr(self.name)}, parent={repr(self.parent)})"
+
 
 class Task:
     def __init__(self, title: str, source: str, done: bool, found_by, wws):
@@ -334,3 +352,9 @@ class Task:
                 time.sleep(self.parent.maw)
                 break
         self.parent.acting = False
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return f"Task(title={repr(self.title)}, author={repr(self.made_by)}, done={repr(self.done)}, parent={repr(self.parent)})"
