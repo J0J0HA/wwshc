@@ -9,7 +9,8 @@ import time
 import wwshc.wwsels
 import wwshc.wwsopt
 import wwshc.wwsevent
-from wwshc.wwsopt import _acting
+from .wwsopt import _acting
+from .wwsopt import cache
 import pyderman
 import wwshc.wwserr
 from selenium.webdriver.common.by import By
@@ -128,6 +129,7 @@ class Agent:
             pass
 
     @_acting()
+    @cache.cached()
     def class_list(self: ClassVar) -> List[wwshc.wwsels.Class]:
         """
         Use this to list all Classes are available for you
@@ -149,7 +151,7 @@ class Agent:
         :return: The Class you requested
         """
         self.check()
-        for c in self.class_list():
+        for c in self.class_list(_ignore=True):
             if c.name == name:
                 self.parent.acting = False
                 return c

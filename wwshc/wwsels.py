@@ -4,6 +4,9 @@ from wwshc.wwsopt import _acting
 import wwshc.wwserr
 import wwshc.wwsopt
 from selenium.webdriver.support.ui import Select
+from typing import *
+from .wwsopt import cache
+from selenium.webdriver.common.by import By
 
 
 class User:
@@ -120,6 +123,7 @@ class Class:
         """
         self.name = name
         self.parent = wws
+        self.brother = self.parent
         self.maw = wws.maw
         self.driver = wws.driver
 
@@ -131,15 +135,19 @@ class Class:
         Select(self.driver.find_element_by_id("top_select_19")).select_by_visible_text(self.name)
 
     @_acting()
-    def users_list(self, only_online=False, stop_name="", stop_mail=""):
+    @cache.cached()
+    def users_list(self, only_online=False, stop_name="", stop_mail="") -> List[User]:
         """
         Use this to list all Users of this Group
 
+        :param stop_name: Name where indexing stops (Performance-tool for .users_getByName)
+        :param stop_mail: Mail where indexing stops (Performance-tool for .users_getByMail)
         :param only_online: If you want to list ony people are online.
         :return: List of all Users of this Group
         """
+        print("j")
         self._navTo()
-        self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
+        self.driver.find_element(by=By.ID, value="menu_109616").find_element_by_tag_name("a").click()
         res = wwshc.wwsopt.filter_userlist(self, only_online, stop_name, stop_mail)
         return res
 

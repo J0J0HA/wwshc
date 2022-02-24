@@ -115,7 +115,14 @@ class Filter:
 
 
 class Cache:
-    funcs: Dict[AnyStr, Any] = {}
+    __doc__ = """
+    
+    """
+
+    cache: Dict[AnyStr, Any] = {}
+    extra: str = "__EXTRA__"
+    SKIP: Final[str] = "__SKIP__"
+    RESET: Final[str] = "__RESET__"
 
     def cached(self, ignore_args: bool = False) -> Callable:
         def decorator(func: Callable) -> Callable:
@@ -128,9 +135,9 @@ class Cache:
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
                             self.clear(repr(func.__module__ + "." + func.__name__))
-                    if not repr(func.__module__ + "." + func.__name__) in self.funcs:
-                        self.funcs[repr(func.__module__ + "." + func.__name__)] = func(*args, **kwargs)
-                    return self.funcs[repr(func.__module__ + "." + func.__name__)]
+                    if not repr(func.__module__ + "." + func.__name__) in self.cache:
+                        self.cache[repr(func.__module__ + "." + func.__name__)] = func(*args, **kwargs)
+                    return self.cache[repr(func.__module__ + "." + func.__name__)]
             else:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
                     if "__EXTRA__" in kwargs:
@@ -140,13 +147,15 @@ class Cache:
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
                             self.clear(repr([func.__module__ + "." + func.__name__, args, kwargs, ]))
-                    if not repr([func.__module__ + "." + func.__name__, args, kwargs, ]) in self.funcs:
-                        self.funcs[repr([func.__module__ + "." + func.__name__, args, kwargs, ])] = func(*args, **kwargs)
-                    return self.funcs[repr([func.__module__ + "." + func.__name__, args, kwargs, ])]
+                    if not repr([func.__module__ + "." + func.__name__, args, kwargs, ]) in self.cache:
+                        self.cache[repr([func.__module__ + "." + func.__name__, args, kwargs, ])] = func(*args, **kwargs)
+                    return self.cache[repr([func.__module__ + "." + func.__name__, args, kwargs, ])]
             return wrapper
         return decorator
 
     def cached_as(self, key: AnyStr, ignore_args: bool = False):
+        if not isinstance(key, str): key = repr(str)
+
         def decorator(func: Callable) -> Callable:
             if ignore_args:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
@@ -156,10 +165,10 @@ class Cache:
                             return func(*args, **kwargs)
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
-                            self.clear(repr(key))
-                    if not repr(key) in self.funcs:
-                        self.funcs[repr(key)] = func(*args, **kwargs)
-                    return self.funcs[repr(key)]
+                            self.clear(key)
+                    if not key in self.cache:
+                        self.cache[key] = func(*args, **kwargs)
+                    return self.cache[key]
             else:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
                     if "__EXTRA__" in kwargs:
@@ -169,14 +178,16 @@ class Cache:
                         if kwargs["__EXTRA__"] == "__RESET__":
                             kwargs.pop("__EXTRA__")
                             self.clear(repr([key, args, kwargs, ]))
-                    if not repr([key, args, kwargs, ]) in self.funcs:
-                        self.funcs[repr([key, args, kwargs, ])] = func(*args, **kwargs)
-                    return self.funcs[repr([key, args, kwargs, ])]
+                    if not repr([key, args, kwargs, ]) in self.cache:
+                        self.cache[repr([key, args, kwargs, ])] = func(*args, **kwargs)
+                    return self.cache[repr([key, args, kwargs, ])]
             return wrapper
         return decorator
 
     def clear(self, key: [AnyStr, None] = None) -> None:
         if key is not None:
-            self.funcs.pop(key)
+            self.cache.pop(key)
         else:
-            self.funcs = {}
+            self.cache = {}
+
+cache = Cache()
