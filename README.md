@@ -43,6 +43,3 @@ if __name__ == "__main__":
 ```
 ### More
 To see more code examples, visit https://wwshc.jojojux.de/examples
-
-
-Requires: selenium>=3.141.0, win10toast>=0.9, pydatfile>=0.0.3
