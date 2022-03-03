@@ -80,6 +80,7 @@ class Group:
         Select(self.driver.find_element_by_id("top_select_18")).select_by_visible_text(self.name)
 
     @_acting()
+    @cache.cached()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users of this Group
@@ -93,6 +94,7 @@ class Group:
         return res
 
     @_acting()
+    @cache.cached()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Group by his Name
@@ -107,6 +109,7 @@ class Group:
         return res
 
     @_acting()
+    @cache.cached()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Group by his E-Mail
@@ -164,6 +167,7 @@ class Class:
         return res
 
     @_acting()
+    @cache.cached()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Class by his Name
@@ -178,6 +182,7 @@ class Class:
         return res
 
     @_acting()
+    @cache.cached()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Class by his E-Mail
@@ -277,6 +282,7 @@ class Class:
         wwshc.wwsopt.use_main(self)
 
     @_acting()
+    @cache.cached()
     def forum_listPosts(self):
         """
         Get a list of all posts in the forum of this class

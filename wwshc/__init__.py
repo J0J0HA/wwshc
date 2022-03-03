@@ -159,6 +159,7 @@ class Agent:
         raise wwshc.wwserr.NoSuchClass(f"No class with name '{name}' found.")
 
     @_acting()
+    @cache.cached()
     def groups_list(self: ClassVar) -> List[wwshc.wwsels.Group]:
         """
         Use this to list all Groups are available for you
@@ -172,6 +173,7 @@ class Agent:
         return grps
 
     @_acting()
+    @cache.cached()
     def groups_get(self, name: str):
         """
         Use this to get a Group avalible for you
@@ -187,6 +189,7 @@ class Agent:
                 return g
         raise wwshc.wwserr.NoSuchGroup(f"No group with name '{name}' found.")
 
+    @cache.cached()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users in Contacts
@@ -249,6 +252,7 @@ class Agent:
         self.driver.close()
         self.driver.switch_to.active_element()
 
+    @cache.cached()
     def users_getByName(self, name: str):
         """
         Use this to get a User in Contacts by his Name
@@ -262,6 +266,7 @@ class Agent:
                 return u
         raise wwshc.wwserr.NoSuchUser(f"No user with name '{name}' found.")
 
+    @cache.cached()
     def users_getByMail(self, mail: str):
         """
         Use this to get a User in Contacts by his E-Mail
@@ -309,6 +314,7 @@ class Agent:
         raise NotImplementedError("Cannot remove a folder.")
 
     @_acting()
+    @cache.cached()
     def tasks_list(self):
         self._navto()
         res = []
@@ -322,8 +328,11 @@ class Agent:
     def tasks_get(self, filter: wwshc.wwsopt.Filter):
         return filter.filter(self.tasks_list())[0]
 
-    def eventloop(self) -> None:
-        return threading.Thread(target=self._eventloop, daemon=True).start()
+    @cache.cached()
+    def eventloop(self) -> threading.Thread:
+        thread = threading.Thread(target=self._eventloop, daemon=True)
+        thread.start()
+        return thread
 
     def _eventloop(self):
         self.events.on_event("new_window", self._handler_new_window)
