@@ -1,7 +1,8 @@
 import wwshc
 
-with open("pass.txt", "r") as f:
-    wws = wwshc.Agent("https://wwschool.de", "johannes.hartel@gsglu.wwschool.de", f.readline(), hide=False)
+with open("pass.txt", "r") as passwd:
+    with open("user.txt", "r") as user:
+        wws = wwshc.Agent("https://wwschool.de", user.readline(), passwd.readline(), hide=False)
 
 
 @wws.events.on("new_window")
