@@ -12,6 +12,7 @@ Install 0.0.11 via pip: `pip install wwshc==0.0.11`
 * Changed namespace-structures
 * Use wwshc or wwshc.references to get all interesting classes (.Agent is now at ._agent.Agent)
 * Changed settings-file format from pydatfile to json (use keys "url", "user", "pass", "wait" in your file and pass the path to "file"-argument)
+* Updated selenium to 4.1.2
 * _Other things I have not planned yet._
 
 ### Changes in 0.0.11:
