@@ -1,133 +1,9 @@
 import time
-import selenium.common.exceptions
-from wwshc.wwsopt import _acting
-import wwshc.wwserr
-import wwshc.wwsopt
-from selenium.webdriver.support.ui import Select
-from typing import *
-from .wwsopt import cache
 from selenium.webdriver.common.by import By
-
-
-class User:
-    def __init__(self, name: str, mail: str, found_by, wws):
-        """
-        :param name: Name of the User
-        :param mail: E-mail of the user
-        :param found_by: The Element wich found the User (Agent, Group, Class)
-        :param wws: The brother Agent
-        """
-        self.name = name
-        self.mail = mail
-        self.brother = found_by
-        self.parent = wws
-        self.driver = wws.driver
-        self.maw = wws.maw
-
-    def _navto(self):
-        """
-        Navigate to the web-page of this element
-        """
-        self.brother._navto()
-        wwshc.wwsopt.void(self.brother.users_list(_ignore=True))
-
-    @_acting()
-    def quick_send(self, text):
-        """
-        Send a Quickmessage to the User
-
-        :param text: Text of the Message to send
-        """
-        self._navto()
-        time.sleep(self.maw)
-        self.driver.find_element_by_xpath(f'//*[contains(concat(" ", normalize-space(@class), " "), " table_list '
-                                          f'")]/tbody/tr/*[contains(text(),'
-                                          f'"{self.mail}")]/..').find_element_by_css_selector(
-            ".icons").find_element_by_css_selector(
-            f"img.set0").click()
-        time.sleep(self.maw)
-        wwshc.wwsopt.use_popup(self)
-        self.driver.switch_to.frame(self.driver.find_element_by_class_name("wysiwyg"))
-        self.driver.find_element_by_class_name("wysiwyg").send_keys(text)
-        self.driver.switch_to.default_content()
-        time.sleep(self.parent.maw)
-        self.driver.find_element_by_class_name("submit").click()
-        wwshc.wwsopt.use_main(self)
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return f"User(name={repr(self.name)}, mail={repr(self.mail)}, agent={repr(self.parent)})"
-
-
-class Group:
-    def __init__(self, name: str, wws):
-        """
-        :param name: Of the Group
-        :param wws: The brother Agent
-        """
-        self.name = name
-        self.parent = wws
-        self.maw = wws.maw
-        self.driver = wws.driver
-
-    def _navto(self):
-        """
-        Navigate to the web-page of this element
-        """
-        self.parent._navto()
-        Select(self.driver.find_element_by_id("top_select_18")).select_by_visible_text(self.name)
-
-    @_acting()
-    @cache.cached()
-    def users_list(self, only_online=False, stop_name="", stop_mail=""):
-        """
-        Use this to list all Users of this Group
-
-        :param only_online: If you want to list ony people are online.
-        :return: List of all Users of this Group
-        """
-        self._navto()
-        self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist(self, only_online, stop_name, stop_mail)
-        return res
-
-    @_acting()
-    @cache.cached()
-    def users_getByName(self, name: str, only_online=False):
-        """
-        Use this to get a User of this Group by his Name
-        :raise wwshc.err.NoSuchUser: If the User cannot be found by your search arguments
-
-        :param name: Name of the User you are requesting.
-        :return: The User you Requested
-        """
-        self._navto()
-        self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist_name(self, name, only_online)
-        return res
-
-    @_acting()
-    @cache.cached()
-    def users_getByMail(self, mail: str, only_online=False):
-        """
-        Use this to get a User of this Group by his E-Mail
-        :raise wwshc.err.NoSuchUser: If the User cannot be found by your search arguments
-
-        :param mail: E-Mail of the User you are requesting.
-        :return: The User you Requested
-        """
-        self._navto()
-        self.driver.find_element_by_id("menu_109756").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist_mail(self, mail, only_online)
-        return res
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return f"Group(name={repr(self.name)}, parent={repr(self.parent)})"
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
+from . import utils
+from typing import *
 
 
 class Class:
@@ -149,9 +25,9 @@ class Class:
         self.parent._navto()
         Select(self.driver.find_element_by_id("top_select_19")).select_by_visible_text(self.name)
 
-    @_acting()
-    @cache.cached()
-    def users_list(self, only_online=False, stop_name="", stop_mail="") -> List[User]:
+    @utils.extra.acting()
+    @utils.extra.cache.cached()
+    def users_list(self, only_online=False, stop_name="", stop_mail="") -> List[user.User]:
         """
         Use this to list all Users of this Group
 
@@ -163,11 +39,11 @@ class Class:
         print("j")
         self._navTo()
         self.driver.find_element(by=By.ID, value="menu_109616").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist(self, only_online, stop_name, stop_mail)
+        res = utils.extra.filter_userlist(self, only_online, stop_name, stop_mail)
         return res
 
-    @_acting()
-    @cache.cached()
+    @utils.extra.acting()
+    @utils.extra.cache.cached()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Class by his Name
@@ -178,11 +54,11 @@ class Class:
         """
         self._navTo()
         self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist_name(self, name, only_online)
+        res = utils.extra.filter_userlist_name(self, name, only_online)
         return res
 
-    @_acting()
-    @cache.cached()
+    @utils.extra.acting()
+    @utils.extra.cache.cached()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Class by his E-Mail
@@ -194,10 +70,10 @@ class Class:
         """
         self._navTo()
         self.driver.find_element_by_id("menu_109616").find_element_by_tag_name("a").click()
-        res = wwshc.wwsopt.filter_userlist_mail(self, mail, only_online)
+        res = utils.extra.filter_userlist_mail(self, mail, only_online)
         return res
 
-    @_acting()
+    @utils.extra.acting()
     def forum_commentPost(self, id: str, text: str, icon: str, popup: bool, quote: bool):
         """
         Send a commant to a post in the forum of this class
@@ -216,13 +92,13 @@ class Class:
                 time.sleep(self.parent.maw)
                 try:
                     p.find_element_by_css_selector('[html_title="Beitrag kommentieren"]').click()
-                except selenium.common.exceptions.NoSuchElementException:
+                except NoSuchElementException:
                     p.find_element_by_css_selector('[html_title="Aufklappen"]').click()
                     p = self.driver.find_element_by_class_name("jail_table").find_element_by_tag_name(
                         "tbody").find_element_by_css_selector(f'tr[id="{id}"]')
                     p.find_elements_by_css_selector('[html_title="Beitrag kommentieren"]')[0].click()
                 time.sleep(self.parent.maw)
-                main = wwshc.wwsopt.use_popup(self)
+                main = utils.extra.use_popup(self)
                 self.driver.switch_to.frame(self.driver.find_element_by_class_name("wysiwyg"))
                 self.driver.find_element_by_class_name("wysiwyg").send_keys(text)
                 self.driver.switch_to.default_content()
@@ -247,15 +123,15 @@ class Class:
                     self.driver.find_element_by_name("quote").click()
                 self.driver.find_element_by_name("preview").click()
                 self.driver.find_element_by_name("save").click()
-                wwshc.wwsopt.use_main(self)
+                utils.extra.use_main(self)
 
-    @_acting()
+    @utils.extra.acting()
     def forum_createPost(self, title: str, text: str, icon: str, popup: bool):
         self._navTo()
         self.driver.find_element_by_id("menu_109660").find_element_by_tag_name("a").click()
         self.driver.find_element_by_link_text("Neuen Diskussionsstrang eröffnen").click()
         time.sleep(self.parent.maw)
-        main = wwshc.wwsopt.use_popup(self)
+        main = utils.extra.use_popup(self)
         self.driver.find_element_by_name("subject").send_keys(title)
         self.driver.switch_to.frame(self.driver.find_element_by_class_name("wysiwyg"))
         self.driver.find_element_by_class_name("wysiwyg").send_keys(text)
@@ -279,10 +155,10 @@ class Class:
             self.driver.find_element_by_name("notification").click()
         self.driver.find_element_by_name("preview").click()
         self.driver.find_element_by_name("save").click()
-        wwshc.wwsopt.use_main(self)
+        utils.extra.use_main(self)
 
-    @_acting()
-    @cache.cached()
+    @utils.extra.acting()
+    @utils.extra.cache.cached()
     def forum_listPosts(self):
         """
         Get a list of all posts in the forum of this class
@@ -301,7 +177,7 @@ class Class:
                     "martha.max")})
         return res
 
-    @_acting()
+    @utils.extra.acting()
     def chat_send(self, msg: str):
         """
         Use This to send a Chat-MSG
@@ -312,55 +188,17 @@ class Class:
         self.driver.find_element_by_id("menu_133729").find_element_by_tag_name("a").click()
         self.driver.find_element_by_id("block_link_open_chat").click()
         time.sleep(self.parent.maw)
-        main = wwshc.wwsopt.use_popup(self)
+        main = utils.extra.use_popup(self)
         self.driver.switch_to.frame(self.driver.find_element_by_class_name("wysiwyg"))
         self.driver.find_element_by_class_name("wysiwyg").send_keys(msg)
         self.driver.switch_to.default_content()
         time.sleep(self.parent.maw)
         self.driver.find_element_by_class_name("submit").click()
         self.driver.find_element_by_id("popup_top_icons_icon_close").find_element_by_tag_name("a").click()
-        wwshc.wwsopt.use_main(self)
+        utils.extra.use_main(self)
 
     def __repr__(self):
         return str(self)
 
     def __str__(self):
         return f"Class(name={repr(self.name)}, parent={repr(self.parent)})"
-
-
-class Task:
-    def __init__(self, title: str, source: str, done: bool, found_by, wws):
-        self.parent = wws
-        self.driver = wws.driver
-        self.brother = found_by
-        self.done = not done
-        self.made_by = source
-        self.title = title
-
-    def reload(self):
-        self.brother._navto()
-        wwshc.wwsopt.void(self.brother.tasks_list())
-
-    def toggle_done(self):
-        time.sleep(self.parent.maw)
-        while self.parent.acting:
-            time.sleep(self.parent.maw)
-        self.parent.acting = True
-        self.reload()
-        for element in self.driver.find_element_by_class_name("jail_table").find_element_by_tag_name(
-                "tbody").find_elements_by_tag_name("tr"):
-            if self.title == element.find_element_by_class_name("c_title").text:
-                element.find_element_by_class_name("c_state").find_element_by_tag_name("img").click()
-                time.sleep(self.parent.maw)
-                main = wwshc.wwsopt.use_popup(self)
-                self.driver.find_element_by_id("id_419089_1").click()
-                wwshc.wwsopt.use_main(self)
-                time.sleep(self.parent.maw)
-                break
-        self.parent.acting = False
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return f"Task(title={repr(self.title)}, author={repr(self.made_by)}, done={repr(self.done)}, parent={repr(self.parent)})"

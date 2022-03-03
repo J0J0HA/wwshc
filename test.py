@@ -1,5 +1,5 @@
 import wwshc
-from wwshc.wwsopt import cache
+from wwshc import cache
 
 with open(r"user.txt", "r") as usernm:
     with open(r"pass.txt", "r") as passwd:

@@ -1,27 +1,23 @@
+from typing import *
+import time
 import json
 import threading
-from typing import *
-import selenium.common.exceptions
 from selenium import webdriver
-from selenium.webdriver.support.ui import Select
-import win10toast
-import time
-import wwshc.wwsels
-import wwshc.wwsopt
-import wwshc.wwsevent
-from .wwsopt import _acting
-from .wwsopt import cache
-import pyderman
-import wwshc.wwserr
 from selenium.webdriver.common.by import By
-
-
-def ensure_chromedriver():
-    pyderman.install(pyderman.chrome, file_directory=".", filename="chromedriver.exe")
+from selenium.webdriver.support.ui import Select
+import selenium.common.exceptions
+import win10toast
+from ._user import User
+from ._class import Class
+from ._group import Group
+from ._task import Task
+from .references import *
+from . import utils
 
 
 class Agent:
-    def __init__(self: ClassVar, url: str = "", user: str = "", passwd: str = "", hide: bool = True, wait: [float, int] = 0.5, no_notification: bool = False, file = None):
+    def __init__(self: ClassVar, url: str = "", user: str = "", passwd: str = "", hide: bool = True,
+                 wait: [float, int] = 0.5, no_notification: bool = False, file=None):
         """
         THIS PROJECT WAS CREATED BY A STUDENT. THERE ARE MANY FUNCTIONS THAT ONLY ADMINS HAVE OR THAT HAVE NOT BEEN RELEASED TO ME. THESE ARE NOT INCLUDED.
         :param url: URL of your wws-System.
@@ -32,7 +28,7 @@ class Agent:
         :param no_notification: Set true if you don't want do see a success notification
         :param file: If set all other params are ignored. Sets the settings in a file
         """
-        ensure_chromedriver()   # Ensure the newest chromedriver is installed.
+        utils.extra.ensure_chromedriver()  # Ensure the newest chromedriver is installed.
         if file is not None:
             f = json.load(file)
             self.URL = f["url"]
@@ -62,9 +58,10 @@ class Agent:
                 break
         self.mainwin = self.driver.current_window_handle
         time.sleep(self.maw)
-        self.events = wwsevent.Events()
+        self.events = utils.events.Events()
         if not no_notification:
-            win10toast.ToastNotifier().show_toast("WWSHC", "WebWeaverSchoolHackClient-Agent erfolgreich gestartet.", threaded=True)
+            win10toast.ToastNotifier().show_toast("WWSHC", "WebWeaverSchoolHackClient-Agent erfolgreich gestartet.",
+                                                  threaded=True)
         self.acting = False
 
     def hold(self: ClassVar, autostop: bool = True):
@@ -78,7 +75,7 @@ class Agent:
             if autostop:
                 try:
                     if len(self.driver.window_handles) == 0:
-                       break
+                        break
                     else:
                         pass
                 except selenium.common.exceptions.InvalidSessionIdException:
@@ -86,7 +83,7 @@ class Agent:
                 except selenium.common.exceptions.WebDriverException:
                     break
 
-    @_acting()
+    @utils.extra.acting()
     def quit(self: ClassVar) -> bool:
         """
         Close the Window
@@ -112,7 +109,7 @@ class Agent:
         Navigate to the given url.
         :param suburl: URL to navigate to.
         """
-        self.driver.get(self.URL+suburl)
+        self.driver.get(self.URL + suburl)
         self.check()
 
     def check(self: ClassVar):
@@ -128,9 +125,9 @@ class Agent:
         except selenium.common.exceptions.NoSuchElementException:
             pass
 
-    @_acting()
-    @cache.cached()
-    def class_list(self: ClassVar) -> List[wwshc.wwsels.Class]:
+    @utils.extra.acting()
+    @utils.caching.cache.cached()
+    def class_list(self: ClassVar) -> List[Class]:
         """
         Use this to list all Classes are available for you
         :return: List
@@ -139,12 +136,12 @@ class Agent:
         clss = []
         for c in Select(self.driver.find_element(by=By.CSS_SELECTOR, value='[html_title="Meine Klassen"]')).options:
             if c.text != "Meine Klassen" and c.text != "--------------------------------------":
-                clss.append(wwshc.wwsels.Class(c.text, self))
+                clss.append(Class(c.text, self))
         return clss
 
-    @_acting()
-    @cache.cached()
-    def class_get(self, name: str) -> wwshc.wwsels.Class:
+    @utils.extra.acting()
+    @utils.caching.cache.cached()
+    def class_get(self, name: str) -> Class:
         """
         Use this to get a Class available for you
         :raise wwshc.err.NoSuchClass: If the Class is not available for you or is not existing
@@ -156,11 +153,11 @@ class Agent:
             if c.name == name:
                 self.parent.acting = False
                 return c
-        raise wwshc.wwserr.NoSuchClass(f"No class with name '{name}' found.")
+        raise utils.exceptions.NoSuchClass(f"No class with name '{name}' found.")
 
-    @_acting()
-    @cache.cached()
-    def groups_list(self: ClassVar) -> List[wwshc.wwsels.Group]:
+    @utils.extra.acting()
+    @utils.caching.cache.cached()
+    def groups_list(self: ClassVar) -> List[Group]:
         """
         Use this to list all Groups are available for you
         :return: List of all Groups
@@ -169,11 +166,11 @@ class Agent:
         grps = []
         for g in Select(self.driver.find_element(by=By.CSS_SELECTOR, value='[html_title="Meine Gruppen"')).options:
             if g.text != "Meine Gruppen" and g.text != "Gruppenübersicht" and g.text != "--------------------------------------":
-                grps.append(wwshc.wwsels.Group(g.text, self))
+                grps.append(Group(g.text, self))
         return grps
 
-    @_acting()
-    @cache.cached()
+    @utils.extra.acting()
+    @utils.caching.cache.cached()
     def groups_get(self, name: str):
         """
         Use this to get a Group avalible for you
@@ -187,9 +184,9 @@ class Agent:
             if g.name == name:
                 self.parent.acting = False
                 return g
-        raise wwshc.wwserr.NoSuchGroup(f"No group with name '{name}' found.")
+        raise utils.exceptions.NoSuchGroup(f"No group with name '{name}' found.")
 
-    @cache.cached()
+    @utils.caching.cache.cached()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users in Contacts
@@ -205,54 +202,54 @@ class Agent:
         for u in self.driver.find_element(by=By.CLASS_NAME, value="table_list").find_element(
                 by=By.TAG_NAME, value="tbody").find_elements(by=By.TAG_NAME, value="tr"):
             if not u.text == "":
-                res.append(wwshc.wwsels.User(u.find_elements(by=By.TAG_NAME, value="td")[3].text,
-                                             u.find_elements(by=By.TAG_NAME, value="td")[4].text, self, self))
+                res.append(User(u.find_elements(by=By.TAG_NAME, value="td")[3].text,
+                                u.find_elements(by=By.TAG_NAME, value="td")[4].text, self, self))
             if u.text == stop_name:
                 return res
         return res
 
-    @_acting()
+    @utils.extra.acting()
     def users_add(self, name_or_mail):
         try:
             self._navto()
             self.driver.find_element(by=By.ID, value="menu_105492").find_element(by=By.TAG_NAME, value="a").click()
             self.driver.find_element(by=By.LINK_TEXT, value="Mitglied aufnehmen").click()
             time.sleep(self.maw)
-            wwshc.wwsopt.use_popup(self)
+            utils.extra.use_popup(self)
             self.driver.find_element(by=By.NAME, value="add_member").send_keys(name_or_mail)
             try:
                 self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
                 self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
             except selenium.common.exceptions.NoSuchElementException:
-                raise wwshc.wwserr.AlreadyInContacts("This User is already in your contact list")
+                raise utils.exceptions.AlreadyInContacts("This User is already in your contact list")
             time.sleep(self.maw)
-            wwshc.wwsopt.use_main(self)
+            utils.extra.use_main(self)
         except selenium.common.exceptions.UnexpectedAlertPresentException as e:
             if e.alert_text == "Kein gültiger Nutzer":
-                raise wwshc.wwserr.NoSuchUser(f"The User {name_or_mail} is not existing.")
+                raise utils.exceptions.NoSuchUser(f"The User {name_or_mail} is not existing.")
             else:
                 print(e.alert_text)
 
-    @_acting()
+    @utils.extra.acting()
     def users_remove(self, name_or_mail):
         self._navto()
         self.driver.find_element(by=By.ID, value="menu_105492").find_element(by=By.TAG_NAME, value="a").click()
         print(self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody")
               .find_element(by=By.XPATH, value=f"//*[contains(text(),'{name_or_mail}')]"))
-        self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody")\
-            .find_element(by=By.XPATH, value=f"//*[contains(text(),'{name_or_mail}')]")\
-            .find_element(by=By.XPATH, value="..").find_element(by=By.CSS_SELECTOR, value=".icons")\
+        self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody") \
+            .find_element(by=By.XPATH, value=f"//*[contains(text(),'{name_or_mail}')]") \
+            .find_element(by=By.XPATH, value="..").find_element(by=By.CSS_SELECTOR, value=".icons") \
             .find_element(by=By.CSS_SELECTOR, value='[html_title="Weitere Funktionen"]').click()
         time.sleep(self.maw)
-        self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody")\
-            .find_element(by=By.XPATH, value=f"//*[contains(text(),'{name_or_mail}')]")\
-            .find_element(by=By.XPATH, value="..").find_element(by=By.CSS_SELECTOR, value=".icons")\
+        self.driver.find_element(by=By.CLASS_NAME, value="jail_table").find_element(by=By.TAG_NAME, value="tbody") \
+            .find_element(by=By.XPATH, value=f"//*[contains(text(),'{name_or_mail}')]") \
+            .find_element(by=By.XPATH, value="..").find_element(by=By.CSS_SELECTOR, value=".icons") \
             .find_element(by=By.XPATH, value=f"//*[contains(text(),'Löschen')]").click()
         self.driver.switch_to.alert()
         self.driver.close()
         self.driver.switch_to.active_element()
 
-    @cache.cached()
+    @utils.caching.cache.cached()
     def users_getByName(self, name: str):
         """
         Use this to get a User in Contacts by his Name
@@ -264,9 +261,9 @@ class Agent:
         for u in self.users_list(stop_name=name):
             if u.name == name:
                 return u
-        raise wwshc.wwserr.NoSuchUser(f"No user with name '{name}' found.")
+        raise utils.exceptions.NoSuchUser(f"No user with name '{name}' found.")
 
-    @cache.cached()
+    @utils.caching.cache.cached()
     def users_getByMail(self, mail: str):
         """
         Use this to get a User in Contacts by his E-Mail
@@ -278,17 +275,17 @@ class Agent:
         for u in self.users_list(stop_mail=mail):
             if u.mail == mail:
                 return u
-        raise wwshc.wwserr.NoSuchUser(f"No user with mail '{mail}' found.")
+        raise utils.exceptions.NoSuchUser(f"No user with mail '{mail}' found.")
 
-    @_acting()
+    @utils.extra.acting()
     def files_uploadFile(self, filepath):
         self.driver.find_element(by=By.ID, value="menu_121332").find_element(by=By.TAG_NAME, value="a").click()
         self.driver.find_element(by=By.LINK_TEXT, value="Neue Datei ablegen").click()
         time.sleep(self.maw)
-        wwshc.wwsopt.use_popup(self)
+        utils.extra.use_popup(self)
         self.driver.find_element(by=By.NAME, value="file[]").send_keys(filepath)
         self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
-        wwshc.wwsopt.use_main(self)
+        utils.extra.use_main(self)
 
     def files_addFile(self, filepath):
         raise NotImplementedError("Cannot add a file.")
@@ -296,16 +293,16 @@ class Agent:
     def files_removeFile(self, path):
         raise NotImplementedError("Cannot remove a file.")
 
-    @_acting()
+    @utils.extra.acting()
     def files_addFolder(self, name, description=""):
         self.driver.find_element(by=By.ID, value="menu_121332").find_element(by=By.TAG_NAME, value="a").click()
         self.driver.find_element(by=By.LINK_TEXT, value="Ordner anlegen").click()
         time.sleep(self.maw)
-        wwshc.wwsopt.use_popup(self)
+        utils.extra.use_popup(self)
         self.driver.find_element(by=By.NAME, value="folder").send_keys(name)
         self.driver.find_element(by=By.NAME, value="description").send_keys(description)
         self.driver.find_element(by=By.CLASS_NAME, value="submit").click()
-        wwshc.wwsopt.use_main(self)
+        utils.extra.use_main(self)
 
     def files_removeFolder(self, path):
         """
@@ -313,22 +310,23 @@ class Agent:
         """
         raise NotImplementedError("Cannot remove a folder.")
 
-    @_acting()
-    @cache.cached()
+    @utils.extra.acting()
+    @utils.caching.cache.cached()
     def tasks_list(self):
         self._navto()
         res = []
         self.driver.find_element(by=By.ID, value="menu_105500").find_element(by=By.TAG_NAME, value="a").click()
-        for element in self.driver.find_element(by=By.CLASS_NAME, value="jail_table")\
+        for element in self.driver.find_element(by=By.CLASS_NAME, value="jail_table") \
                 .find_element(by=By.TAG_NAME, value="tbody").find_elements(by=By.TAG_NAME, value="tr"):
-            res.append(wwshc.wwsels.Task(element.find_element(by=By.CLASS_NAME, value="c_title").text,
-                       element.find_element(by=By.CLASS_NAME, value="c_source").text, element.get_property("sort") == "2", self, self))
+            res.append(Task(element.find_element(by=By.CLASS_NAME, value="c_title").text,
+                            element.find_element(by=By.CLASS_NAME, value="c_source").text,
+                            element.get_property("sort") == "2", self, self))
         return res
 
-    def tasks_get(self, filter: wwshc.wwsopt.Filter):
+    def tasks_get(self, filter: utils.extra.Filter):
         return filter.filter(self.tasks_list())[0]
 
-    @cache.cached()
+    @utils.caching.cache.cached()
     def eventloop(self) -> threading.Thread:
         thread = threading.Thread(target=self._eventloop, daemon=True)
         thread.start()
@@ -342,29 +340,37 @@ class Agent:
         while True:
             time.sleep(self.maw)
             # Window Changed
-            if (self.driver.current_window_handle, self.driver.title, self.driver.current_url,) != (last_window, last_title, last_url,):
+            if (self.driver.current_window_handle, self.driver.title, self.driver.current_url,) != (
+            last_window, last_title, last_url,):
                 last_window = self.driver.current_window_handle
                 last_url = self.driver.current_url
                 last_title = self.driver.title
-                self.events.cause("status_changed", status={"window": self.driver.current_window_handle, "title": self.driver.title, "url": self.driver.current_url})
+                self.events.cause("status_changed",
+                                  status={"window": self.driver.current_window_handle, "title": self.driver.title,
+                                          "url": self.driver.current_url})
 
             # New Windows
             all = self.parent.driver.window_handles
             all.remove(self.parent.mainwin)
             for i in self.parent.genwins:
-                try: all.remove(i)
-                except: pass
+                try:
+                    all.remove(i)
+                except:
+                    pass
             for i in self.parent.foundwins:
-                try: all.remove(i)
-                except: pass
+                try:
+                    all.remove(i)
+                except:
+                    pass
             if len(all) > 0 and not self.acting:
                 self.acting = True
                 new = all.pop()
                 self.foundwins.append(new)
                 self.driver.switch_to.window(new)
                 time.sleep(self.maw)
-                self.events.cause("new_window", window=self.driver.current_window_handle, title=self.driver.title, url=self.driver.current_url)
-                wwshc.wwsopt.use_main(self)
+                self.events.cause("new_window", window=self.driver.current_window_handle, title=self.driver.title,
+                                  url=self.driver.current_url)
+                utils.extra.use_main(self)
                 self.acting = False
 
             # Quicks
@@ -377,13 +383,13 @@ class Agent:
                 name = self.driver.find_element(by=By.XPATH,
                                                 value='//*[@id="main_content"]/table/tbody/tr[1]/td[2]/span').text
                 mail = self.driver.find_element(by=By.XPATH,
-                                                value='//*[@id="main_content"]/table/tbody/tr[1]/td[2]/span')\
+                                                value='//*[@id="main_content"]/table/tbody/tr[1]/td[2]/span') \
                     .get_attribute("html_title")
                 send_time = self.driver.find_element(by=By.XPATH,
                                                      value='//*[@id="main_content"]/table/tbody/tr[2]/td[2]').text
                 self.events.cause("quick_received", text=text, name=name, mail=mail, send_time=send_time)
                 self.driver.close()
-                wwshc.wwsopt.use_main(self)
+                utils.extra.use_main(self)
                 self.acting = False
 
     def _handler_new_window(self, window, title, url):
@@ -402,7 +408,7 @@ class Agent:
     def __del__(self):
         try:
             if len(self.driver.window_handles) != 0:
-               self.driver.close()
+                self.driver.close()
         except selenium.common.exceptions.InvalidSessionIdException:
             return False
         except selenium.common.exceptions.WebDriverException:
