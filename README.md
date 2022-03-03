@@ -49,4 +49,4 @@ if __name__ == "__main__":
     wws.events.on_event("quick_received", answer)     # Setting the function as event listener
 ```
 ### More
-To see more code examples, see [here](https://github.com/J0J0HA/wwshc/tree/master/example).
+To see more code examples, see [here](https://github.com/J0J0HA/wwshc/tree/master/examples).
