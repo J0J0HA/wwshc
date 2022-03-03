@@ -5,6 +5,12 @@ This is an unofficial module to control WWS (https://wwschool.de; Also other Ser
 Install 0.0.11 via pip: `pip install wwshc==0.0.11`
 
 ## Changelog
+### Incoming Changes in 0.0.12
+* Adding Cache (wwshc.wwsopt.cache)
+* Continued updating syntax of selenium find_element functions
+* Implemented more annotations
+* _Other things I have not planned yet._
+
 ### Changes in 0.0.11:
 * Added eventsystem (wws.events)
 * Updated selenium to 4.1.0
