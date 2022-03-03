@@ -9,6 +9,7 @@ Install 0.0.11 via pip: `pip install wwshc==0.0.11`
 * Adding Cache (wwshc.wwsopt.cache)
 * Continued updating syntax of selenium find_element functions
 * Implemented more annotations
+* Changed settings-file format from pydatfile to json (use keys "url", "user", "pass", "wait" in your file and pass the path to "file"-argument)
 * _Other things I have not planned yet._
 
 ### Changes in 0.0.11:
@@ -26,7 +27,7 @@ import wwshc
 wws = wwshc.Agent("https://wwschool.de", "username", "password")
 ```
 ### Messaging
-To send yourself a message, use `Agent.users_getByMail()` and then `User.send_quick()`.
+To send yourself a message, use `Agent.users_getByMail()` and then `User.quick_send()`.
 ```
 you = wws.users_getByMail(wws.USER)   # Get User by your own mail adress (mathes wws.USER)
 you.send_quick("Hello!")              # Sending a Quickmessage with the text "hi"
