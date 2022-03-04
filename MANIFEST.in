@@ -1,6 +1,7 @@
 include pyproject.toml
 include *.md
 include wwshc/*.py
+include wwshc/utils/*.py
 include LICENSE.txt
 include requirements.txt
 include setup.py

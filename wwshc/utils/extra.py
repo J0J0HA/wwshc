@@ -1,3 +1,4 @@
+import random
 import time
 import selenium.common.exceptions
 from .. import utils
@@ -20,12 +21,14 @@ def acting(*vargs: Tuple[Any], **vkwargs: Dict[Any, Any]) -> Callable:
 
     def worker(func: Callable) -> Callable:
         def wrapper(*args: Tuple[Any], **kwargs: Dict[str, Any]) -> Any:
-            if "_ignore" in kwargs and kwargs["_ignore"]:
-                kwargs.pop("_ignore")
+            print("got request", func.__name__)
+            if "__ACTING__" in kwargs and kwargs["__ACTING__"] == "__DISABLE__":
+                kwargs.pop("__ACTING__")
                 return func(*args, **kwargs)
             else:
-                time.sleep(args[0].maw)
+                time.sleep(random.random())
                 while args[0].parent.acting:
+                    print(func.__name__, "is waiting!", repr((args, kwargs, )), args[0].parent.acting)
                     time.sleep(args[0].maw)
                 args[0].parent.acting = True
                 r = func(*args, **kwargs)
@@ -98,21 +101,3 @@ def use_popup(self, ignore: Optional[List[str]] = None):
 
 def use_main(self):
     self.driver.switch_to.window(self.parent.mainwin)
-
-
-class Filter:
-    def __init__(self, **kwargs):
-        self.allowed = kwargs.keys()
-        for k in kwargs.keys():
-            self.__setattr__(k, kwargs[k])
-
-    def filter(self, list):
-        """
-        *** UNDOCUMENTATED ***
-        """
-        filtered_list = list
-        for a in self.allowed:
-            for e in list:
-                if self.__getattribute__(a) == e.__getattribute__(a):
-                    filtered_list.remove(e)
-        return filtered_list

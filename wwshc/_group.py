@@ -1,7 +1,9 @@
 from . import utils
 from typing import *
 from selenium.webdriver.common.by import By
+from .references import cache
 from selenium.webdriver.support.ui import Select
+
 
 class Group:
     def __init__(self, name: str, wws):
@@ -22,7 +24,7 @@ class Group:
         Select(self.driver.find_element_by_id("top_select_18")).select_by_visible_text(self.name)
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users of this Group
@@ -36,7 +38,7 @@ class Group:
         return res
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Group by his Name
@@ -51,7 +53,7 @@ class Group:
         return res
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Group by his E-Mail

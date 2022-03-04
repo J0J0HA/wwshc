@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 from . import utils
+from .references import cache, User
 from typing import *
 
 
@@ -26,8 +27,8 @@ class Class:
         Select(self.driver.find_element_by_id("top_select_19")).select_by_visible_text(self.name)
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
-    def users_list(self, only_online=False, stop_name="", stop_mail="") -> List[user.User]:
+    @cache.cached()
+    def users_list(self, only_online=False, stop_name="", stop_mail="") -> List[User]:
         """
         Use this to list all Users of this Group
 
@@ -43,7 +44,7 @@ class Class:
         return res
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def users_getByName(self, name: str, only_online=False):
         """
         Use this to get a User of this Class by his Name
@@ -58,7 +59,7 @@ class Class:
         return res
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def users_getByMail(self, mail: str, only_online=False):
         """
         Use this to get a User of this Class by his E-Mail
@@ -158,7 +159,7 @@ class Class:
         utils.extra.use_main(self)
 
     @utils.extra.acting()
-    @utils.extra.cache.cached()
+    @cache.cached()
     def forum_listPosts(self):
         """
         Get a list of all posts in the forum of this class

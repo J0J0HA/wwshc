@@ -7,22 +7,22 @@ class Cache:
     """
 
     cache: Dict[AnyStr, Any] = {}
-    EXTRA: Final[str] = "__EXTRA__"
-    SKIP: Final[str] = "__SKIP__"
-    C_SKIP: Final[dict] = {EXTRA: SKIP}
-    RESET: Final[str] = "__RESET__"
-    C_RESET: Final[str] = {EXTRA: RESET}
+    EXTRA: str = "__EXTRA__"
+    SKIP: str = "__SKIP__"
+    C_SKIP: dict = {EXTRA: SKIP}
+    RESET: str = "__RESET__"
+    C_RESET: str = {EXTRA: RESET}
 
     def cached(self, ignore_args: bool = False, remove_first: bool = False) -> Callable:
         def decorator(func: Callable) -> Callable:
             if ignore_args is True:
                 def wrapper(*args: Tuple, **kwargs: Dict[AnyStr, Any]) -> Any:
-                    if "__EXTRA__" in kwargs:
-                        if kwargs["__EXTRA__"] == "__SKIP__":
-                            kwargs.pop("__EXTRA__")
+                    if "__CACHE__" in kwargs:
+                        if kwargs["__CACHE__"] == "__SKIP__":
+                            kwargs.pop("__CACHE__")
                             return func(*args, **kwargs)
-                        if kwargs["__EXTRA__"] == "__RESET__":
-                            kwargs.pop("__EXTRA__")
+                        if kwargs["__CACHE__"] == "__RESET__":
+                            kwargs.pop("__CACHE__")
                             self.clear(repr(func.__module__ + "." + func.__name__))
                     if not repr(func.__module__ + "." + func.__name__) in self.cache:
                         self.cache[repr(func.__module__ + "." + func.__name__)] = func(*args, **kwargs)
@@ -101,6 +101,5 @@ class Cache:
             self.cache.pop(key)
         else:
             self.cache = {}
-
 
 cache = Cache()

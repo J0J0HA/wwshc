@@ -183,6 +183,7 @@ class Agent:
         raise utils.exceptions.NoSuchGroup(f"No group with name '{name}' found.")
 
     @cache.cached()
+    @utils.extra.acting()
     def users_list(self, only_online=False, stop_name="", stop_mail=""):
         """
         Use this to list all Users in Contacts
@@ -319,8 +320,20 @@ class Agent:
                             element.get_property("sort") == "2", self, self))
         return res
 
-    def tasks_get(self, filter: utils.extra.Filter):
-        return filter.filter(self.tasks_list())[0]
+    def tasks_getByTitle(self, title: str) -> List[Task]:
+        def f(task: Task) -> bool:
+            return task.title == title
+        return list(filter(f, self.tasks_list()))
+
+    def tasks_getByAuthor(self, author: str) -> List[Task]:
+        def f(task: Task) -> bool:
+            return task.made_by == author
+        return list(filter(f, self.tasks_list()))
+
+    def tasks_getByDone(self, done: bool) -> List[Task]:
+        def f(task: Task) -> bool:
+            return task.done is done
+        return list(filter(f, self.tasks_list()))
 
     @cache.cached()
     def eventloop(self) -> threading.Thread:

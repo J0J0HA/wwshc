@@ -1,5 +1,6 @@
 import time
 from selenium.webdriver.common.by import By
+from .references import NOACT
 from . import utils
 
 
@@ -23,7 +24,7 @@ class User:
         Navigate to the web-page of this element
         """
         self.brother._navto()
-        utils.extra.void(self.brother.users_list(_ignore=True))
+        utils.extra.void(self.brother.users_list(**NOACT))
 
     @utils.extra.acting()
     def quick_send(self, text):

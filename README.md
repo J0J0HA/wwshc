@@ -2,14 +2,16 @@
 This is an unofficial module to control WWS (https://wwschool.de; Also other Services using WebWeaver Software) via python code.
 
 ## PIP
-Install 0.0.11 via pip: `pip install wwshc==0.0.11`
+* Install 0.0.11 via pip: `pip install wwshc==0.0.11`
+* Or see at [PyPi.org](https://pypi.org/project/wwshc/0.0.11/)
 
 ## Changelog
 ### Incoming Changes in 0.0.12
-* Adding Cache (wwshc.wwsopt.cache)
+* Adding Cache (wwshc.wwsopt.Cache; later .utils.caching.Cache or easily .Cache)
 * Continued updating syntax of selenium find_element functions
 * Implemented more annotations
 * Changed settings-file format from pydatfile to json (use keys "url", "user", "pass", "wait" in your file and pass the path to "file"-argument)
+* Removed .utils.extra.Filter (earlier .wwsopt.Filter)
 * _Other things I have not planned yet._
 
 ### Changes in 0.0.11:
