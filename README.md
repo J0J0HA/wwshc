@@ -2,11 +2,14 @@
 This is an unofficial module to control WWS (https://wwschool.de; Also other Services using WebWeaver Software) via python code.
 
 ## PIP
-*Install 0.0.11 via pip: `pip install wwshc==0.0.11`
+* Install 0.0.11 via pip: `pip install wwshc==0.0.11`
 * Or see at [PyPi.org](https://pypi.org/project/wwshc/0.0.11/)
 
 ## Changelog
-### Incoming Changes in 0.0.12
+### Planned Changes in 0.0.12
+* correcting all `find_elemtent_by`-syntaxes from selenium
+
+### Made Changes in 0.0.12
 * Adding Cache (`wwshc.wwsopt.Cache`; later `.utils.caching.Cache` or easily `.Cache`)
 * Continued updating syntax of selenium find_element functions
 * Implemented more annotations
