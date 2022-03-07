@@ -1,5 +1,6 @@
 # WWSHC
 This is an unofficial module to control WWS (https://wwschool.de; Also other Services using WebWeaver Software) via python code.
+(It is planned to also make a GUI HackClient; takes may only a few more months)
 
 ## PIP
 * Install 0.0.11 via pip: `pip install wwshc==0.0.11`
@@ -21,7 +22,6 @@ This is an unofficial module to control WWS (https://wwschool.de; Also other Ser
 * Changed acting's `_ignore: bool` to `__ACTING__: str`
 * Changed Caches's `__EXTRA__: str` to `__CACHE__: str`
 * Use `**NOACT`, `**SKIP` and `**RESET` instead of `__ACTING__=="DISABLED"`, `__CACHE__="__SKIP__"` or `__CACHE__=="__RESET__"`
-* _Other things I have not planned yet._
 
 ### Changes in 0.0.11:
 * Added eventsystem (`wws.events`)
