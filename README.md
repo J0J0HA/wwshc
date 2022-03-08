@@ -29,7 +29,7 @@ This is an unofficial module to control WWS (https://wwschool.de; Also other Ser
 * Started updating syntax of selenium find_element functions
 * Corrected some IDs that have changed in WWS
 
-**[Changelog for all versions](github.com/J0J0HA/wwshc/blob/master/CHANGELOG.md)**
+**[Changelog for all versions](CHANGELOG.md)**
 
 ## Code Examples
 ### Login
