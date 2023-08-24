@@ -1,15 +1,23 @@
-# Not discontinued!
-**This project is neither finished nor discontinued!**  
-It may seems so, since the last commit is very long ago, but this is still being supported.  
-If you want a feature to be added or have any errors, feel free to create an issue, I will look into it.
+# Discontinued!
+**This project is discontinued in an unfinished state!**
+This project is not being supported anymore. Feel free to create a fork.
 
-
+> [!NOTE]  
+> A similar project may be redone in the future, but I cannot handle my 2 years-old code, it is too messy... (Some variables are named after a different platform even!)
 
 # WWSHC
+
+> [!WARNING]  
+> WebWeave has changed its UI, this is not working anymore.
+
 This is an unofficial module to control WWS (https://wwschool.de; Also other Services using WebWeaver Software) via python code.
 (It is planned to also make a GUI HackClient; takes may only a few more months)
 
 ## PIP
+
+> [!WARNING]  
+> This does not work.
+
 * Install 0.0.11 via pip: `pip install wwshc==0.0.11`
 * Or see at [PyPi.org](https://pypi.org/project/wwshc/0.0.11/)
 
